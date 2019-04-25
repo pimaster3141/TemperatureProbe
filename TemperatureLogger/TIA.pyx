@@ -29,7 +29,7 @@ class TIADriver(mp.Process):
 
 		self._packet = array.array('b', [0]*_PAYLOAD_SIZE);
 
-		self.sampleRate = mp.Value('L', 0);
+		self.sampleCounter = mp.Value('L', 0);
 		self.startTime = mp.Value('f', 0.0);
 
 		self.isDead = mp.Event();
@@ -52,6 +52,9 @@ class TIADriver(mp.Process):
 					raise Exception("Device not ready");
 
 				self.pipeIn.send_bytes(self._packet);
+
+				c = self.sampleCounter.value;
+				self.sampleCounter.value = c + 1;
 
 		except Exception as e:
 			try:
@@ -93,10 +96,12 @@ class TIADriver(mp.Process):
 		self.serial.reset_input_buffer();
 
 	def getSampleRate(self):
-		return self.sampleRate.value;
+		currentTime = time.time();
+		samples = self.sampleCounter.value;
+		startTime = self.startTime.value;
 
-	def findStart(self):
-		current = self.serial.read(1)[0]
-		while(current != HEADER and self.isAlive):
-			current = self.serial.read(1)[0]
-		self.serial.read(8)
+		return int(samples/(currentTime-startTime));
+
+	def resetSampleRate(self):
+		self.sampleCounter.value = 0;
+		self.startTime.value = time.time();
