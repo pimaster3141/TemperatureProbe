@@ -1,4 +1,4 @@
-import multiprocessing as mp
+# import multiprocessing as mp
 import array
 import queue
 import time
@@ -7,17 +7,17 @@ import copy
 import psutil
 import os
 
-# import threading
+import threading
 
 
-class DataHandler(mp.Process):
-# class DataHandler(threading.Thread):
+# class DataHandler(mp.Process):
+class DataHandler(threading.Thread):
 	_TIMEOUT = 1
 	QUEUE_DEPTH = 100;
 
 	def __init__(self, MPI, dataPipe, bufferSize, sampleSize=2, filename=None, directory='./output/'):
-		mp.Process.__init__(self);
-		# threading.Thread.__init__(self);
+		# mp.Process.__init__(self);
+		threading.Thread.__init__(self);
 
 		self.sampleSizeCode = None;
 		if(sampleSize == 2):
@@ -32,14 +32,14 @@ class DataHandler(mp.Process):
 
 		self.dataBuffer = array.array(self.sampleSizeCode, [0]*int(bufferSize/sampleSize));
 
-		self.realtimeData = mp.Event();
-		self.realtimeQueue = mp.Queue(DataHandler.QUEUE_DEPTH);
+		self.realtimeData = threading.Event();
+		self.realtimeQueue = threading.Queue(DataHandler.QUEUE_DEPTH);
 
 		self.outFile = None;
 		if(directory == None):
 			directory = '';
 		self.directory = directory;
-		self.debug = mp.Event();
+		self.debug = threading.Event();
 		self.debug.set();
 		if(filename != None):
 			if(not(directory[-1] == '/')):
@@ -48,11 +48,11 @@ class DataHandler(mp.Process):
 			self.outFile = open(self.directory + filename, 'wb');
 			self.debug.clear();
 
-		self.fileUpdateQueue = mp.Queue(2);
-		self.isOutFileUpdate = mp.Event();
+		self.fileUpdateQueue = threading.Queue(2);
+		self.isOutFileUpdate = threading.Event();
 
-		self.isDead = mp.Event();
-		self.isPaused = mp.Event();
+		self.isDead = threading.Event();
+		self.isPaused = threading.Event();
 		self.isPaused.set();
 
 
