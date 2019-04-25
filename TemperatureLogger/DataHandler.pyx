@@ -21,7 +21,7 @@ class DataHandler(threading.Thread):
 
 		self.sampleSizeCode = None;
 		if(sampleSize == 2):
-			self.sampleSizeCode = 'h';
+			self.sampleSizeCode = 'H';
 		else:
 			raise Exception("Sample Size Code not implemented");
 
