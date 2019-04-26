@@ -1,12 +1,22 @@
 import numpy as np
 
+class QVConveter:
+	def __init__(self, fullscale=3.3, span=65535):
+		self.fullscale = fullscale;
+		self.span = span;
+
+	def convert(self, LSB):
+		return LSB * self.fullscale / self.span;
+
 class VRConverter:
 	def __init__(self, vBias, rBias):
 		self.vBias = vBias;
 		self.rBias = rBias;
 
-	def convert(self, vIn):
-		return ((vIn - self..vBias) * self.rBias/self.vBias);
+	def convert(self, vIn, vBias=None):
+		if(vBias == None):
+			vBias = self.vBias;
+		return ((vIn - vBias) * self.rBias/vBias);
 
 
 class RTConverter3:
