@@ -10,7 +10,7 @@ class TIADriver(mp.Process):
 	_HEADER = 0XAA;
 	_START_BYTE = 0X61;
 	_STOP_BYTE = 0X62;
-	_PAYLOAD_SIZE = 8;
+	_PAYLOAD_SIZE = 8*100;
 
 	_BAUD = 2000000;
 	_TIMEOUT = 1;

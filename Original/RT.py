@@ -107,7 +107,7 @@ class RTThermistor4:
 	def getTempC(self, res):
 		if(res < 0):
 			res = 1E-10
-		output = self.A + self.B*math.log(res) + self.C*(math.log(res))**3 + self.D*(math.log(res))**3
+		output = self.A + self.B*math.log(res) + self.C*(math.log(res))**3 + self.D*(math.log(res))**5
 		return 1/output - 273.15
 
 	#	Manual Coefficient setting
