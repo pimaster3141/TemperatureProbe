@@ -11,12 +11,11 @@ class DataProcessor(threading.Thread):
 
 	FULLSCALE_VOLTAGE = 3.3;
 
-	def __init__(self, MPI, inputBuffer, fs, bufferSize, rBias=[None, None] , STCoeff=[None, None]):
+	def __init__(self, MPI, inputBuffer, bufferSize, rBias=[None, None] , STCoeff=[None, None]):
 		threading.Thread.__init__(self);
 
 		self.MPI = MPI;
 		self.inputBuffer = inputBuffer;
-		self.fs = fs;
 
 		self.vBias = vBias;
 		self.QVConverter = Converters.QVConverter();

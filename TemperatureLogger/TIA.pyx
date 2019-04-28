@@ -101,7 +101,7 @@ class TIADriver(mp.Process):
 		samples = self.sampleCounter.value;
 		startTime = self.startTime.value;
 
-		return int(samples/(currentTime-startTime));
+		return int(samples*_PAYLOAD_SIZE/8/(currentTime-startTime));
 
 	def resetSampleRate(self):
 		self.sampleCounter.value = 0;
