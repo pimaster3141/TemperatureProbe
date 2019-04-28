@@ -68,6 +68,7 @@ class TIADriver(mp.Process):
 		self.isDead.set();
 		try:
 			self.MPI.put_nowait("Stopping Driver");
+			self.serial.close();
 		except Exception as ei:
 			pass
 		finally:
