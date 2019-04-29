@@ -8,17 +8,17 @@ import psutil
 import os
 import multiprocessing as mp
 
-import threading
+# import threading
 
 
-# class DataHandler(mp.Process):
-class DataHandler(threading.Thread):
+class DataHandler(mp.Process):
+# class DataHandler(threading.Thread):
 	_TIMEOUT = 1
 	QUEUE_DEPTH = 1000;
 
 	def __init__(self, MPI, dataPipe, bufferSize, sampleSize=2, filename=None, directory='./output/'):
-		# mp.Process.__init__(self);
-		threading.Thread.__init__(self);
+		mp.Process.__init__(self);
+		# threading.Thread.__init__(self);
 
 		self.sampleSizeCode = None;
 		if(sampleSize == 2):
@@ -33,14 +33,14 @@ class DataHandler(threading.Thread):
 
 		self.dataBuffer = array.array(self.sampleSizeCode, [0]*int(bufferSize/sampleSize));
 
-		self.realtimeData = threading.Event();
+		self.realtimeData = mp.Event();
 		self.realtimeQueue = mp.Queue(DataHandler.QUEUE_DEPTH);
 
 		self.outFile = None;
 		if(directory == None):
 			directory = '';
 		self.directory = directory;
-		self.debug = threading.Event();
+		self.debug = mp.Event();
 		self.debug.set();
 		if(filename != None):
 			if(not(directory[-1] == '/')):
@@ -50,10 +50,10 @@ class DataHandler(threading.Thread):
 			self.debug.clear();
 
 		self.fileUpdateQueue = mp.Queue(2);
-		self.isOutFileUpdate = threading.Event();
+		self.isOutFileUpdate = mp.Event();
 
-		self.isDead = threading.Event();
-		self.isPaused = threading.Event();
+		self.isDead = mp.Event();
+		self.isPaused = mp.Event();
 		self.isPaused.set();
 
 

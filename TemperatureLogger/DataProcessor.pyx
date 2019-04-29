@@ -1,20 +1,22 @@
 import setuptools
 import pyximport; pyximport.install()
-import threading
+# import threading
 import multiprocessing as mp
 import numpy as np
 import queue
 import Converters
 import time
+import psutil
+import os
 
-class DataProcessor(threading.Thread):
+class DataProcessor(mp.Process):
 	QUEUE_TIMEOUT = 1;
 	QUEUE_DEPTH = 100;
 
 	FULLSCALE_VOLTAGE = 3.3;
 
 	def __init__(self, MPI, inputBuffer, bufferSize, rBias=[None, None] , STCoeff=[None, None]):
-		threading.Thread.__init__(self);
+		mp.Process.__init__(self);
 
 		self.MPI = MPI;
 		self.inputBuffer = inputBuffer;
@@ -33,12 +35,15 @@ class DataProcessor(threading.Thread):
 
 		self.dataBuffer = mp.Queue(DataProcessor.QUEUE_DEPTH);
 
-		self.isDead = threading.Event();
+		self.isDead = mp.Event();
 
 	def run(self):
 		try:
+			p = psutil.Process(os.getpid());
+			p.nice(5);
 			initialData = np.zeros(self.packetSize, dtype=self.npDtype);
 			while(not self.isDead.is_set()):
+				# time.sleep(0.02)
 				try:
 					initialData[0:] = self.inputBuffer.get(block=True, timeout=DataProcessor.QUEUE_TIMEOUT);
 				except queue.Empty:

@@ -73,7 +73,7 @@ class TemperatureSystem():
 		self.processor.start();
 		self.handler.resume();
 		processorBuffer = self.processor.getBuffer();
-		self.display = Display.GraphWindow(processorBuffer, self.fs*4.0/TIA.TIADriver._PAYLOAD_SIZE, stopFcn=self.stop);
+		self.display = Display.GraphWindow(processorBuffer, self.fs*8.0/TIA.TIADriver._PAYLOAD_SIZE, stopFcn=self.stop);
 		self.display.run();
 		print("Device running");
 

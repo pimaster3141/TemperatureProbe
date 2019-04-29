@@ -3,11 +3,13 @@ import pyqtgraph as pg
 import numpy as np
 import time
 import queue
+import os
+import psutil
 
 class GraphWindow():
 	QUEUE_TIMEOUT = 5;
 
-	def __init__(self, dataBuffer, sampleRate, depth=10, refreshRate=30, stopFcn=None):
+	def __init__(self, dataBuffer, sampleRate, depth=10, refreshRate=20, stopFcn=None):
 		self.dataBuffer = dataBuffer;
 		self.depth = depth;
 		self.sampleRate = sampleRate;
@@ -25,6 +27,9 @@ class GraphWindow():
 		self.setupPlots();
 		self.setupDataBuffers();
 		self.setupCurves();
+
+		p = psutil.Process(os.getpid());
+		p.nice(10);
 
 	def setupPlots(self):
 		self.win = pg.GraphicsWindow("Temperature");
@@ -85,8 +90,18 @@ class GraphWindow():
 
 	def updateRoutine(self):
 		data = self.dataBuffer.get(block=True, timeout=GraphWindow.QUEUE_TIMEOUT);
+		data = GraphWindow.emptyBuffer(self.dataBuffer, data);
 		self.updateDataBuffers(data);
 		self.updateCurves();
+
+	def emptyBuffer(buf, initial):
+		try:
+			while(True):
+				data = buf.get_nowait();
+				initial = np.vstack((initial, data));
+		except queue.Empty:
+			pass;
+		return initial;
 
 	def run(self):
 		if(self.isAlive):
