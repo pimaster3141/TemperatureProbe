@@ -6,6 +6,7 @@ import time
 import copy
 import psutil
 import os
+import multiprocessing as mp
 
 import threading
 
@@ -13,7 +14,7 @@ import threading
 # class DataHandler(mp.Process):
 class DataHandler(threading.Thread):
 	_TIMEOUT = 1
-	QUEUE_DEPTH = 100;
+	QUEUE_DEPTH = 1000;
 
 	def __init__(self, MPI, dataPipe, bufferSize, sampleSize=2, filename=None, directory='./output/'):
 		# mp.Process.__init__(self);
@@ -33,7 +34,7 @@ class DataHandler(threading.Thread):
 		self.dataBuffer = array.array(self.sampleSizeCode, [0]*int(bufferSize/sampleSize));
 
 		self.realtimeData = threading.Event();
-		self.realtimeQueue = threading.Queue(DataHandler.QUEUE_DEPTH);
+		self.realtimeQueue = mp.Queue(DataHandler.QUEUE_DEPTH);
 
 		self.outFile = None;
 		if(directory == None):
@@ -48,7 +49,7 @@ class DataHandler(threading.Thread):
 			self.outFile = open(self.directory + filename, 'wb');
 			self.debug.clear();
 
-		self.fileUpdateQueue = threading.Queue(2);
+		self.fileUpdateQueue = mp.Queue(2);
 		self.isOutFileUpdate = threading.Event();
 
 		self.isDead = threading.Event();
@@ -62,9 +63,10 @@ class DataHandler(threading.Thread):
 		try: 
 			while(not self.isDead.is_set()):				
 				if(self.dataPipe.poll(DataHandler._TIMEOUT)):					
-					self.dataPipe.recv_bytes_into(self.dataBuffer);					
+					self.dataPipe.recv_bytes_into(self.dataBuffer);	
+					self.dataBuffer.byteswap();
 
-					if(not self.isPaused.is_set()):
+					if(not self.isPaused.is_set()):		
 						if(not self.debug.is_set()):						
 							self.dataBuffer.tofile(self.outFile);						
 

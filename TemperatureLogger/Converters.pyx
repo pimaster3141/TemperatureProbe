@@ -1,6 +1,6 @@
 import numpy as np
 
-class QVConveter:
+class QVConverter:
 	def __init__(self, fullscale=3.3, span=65535):
 		self.fullscale = fullscale;
 		self.span = span;
@@ -12,11 +12,14 @@ class VRConverter:
 	def __init__(self, vBias, rBias):
 		self.vBias = vBias;
 		self.rBias = rBias;
+		self.alpha = 0.005;
 
-	def convert(self, vIn, vBias=None):
-		if(vBias == None):
-			vBias = self.vBias;
-		return ((vIn - vBias) * self.rBias/vBias);
+	def convert(self, vIn, vBias):
+		# if(vBias == None):
+		# 	vBias = self.vBias;
+		vBias = np.mean(vBias);
+		self.vBias = vBias*self.alpha + self.vBias*(1-self.alpha);
+		return ((vIn - self.vBias) * self.rBias/self.vBias);
 
 
 class RTConverter3:

@@ -21,9 +21,9 @@ import time
 print("Done");
 
 class TemperatureSystem():
-	BIAS_RESISTORS = [100E3, None];
-	STCoeff=[[1,1,1],
-		[None, None, None]]
+	BIAS_RESISTORS = [10E3, None];
+	ST_COEFF=[[6.71742703E-04, 2.20416992E-04, 9.98713347E-08, -4.61649439E-11],
+		[None, None, None, None]]
 
 	def __init__(self, device, outFile=None):
 		self.outFile = outFile;
@@ -34,7 +34,7 @@ class TemperatureSystem():
 
 		self.TIA = TIA.TIADriver(self.MPITIA, device);
 		tiaPipe = self.TIA.getPipe();
-		self.handler = DataHander.DataHander(self.MPIHandler, tiaPipe, TIADriver._PAYLOAD_SIZE, filename=outFile);
+		self.handler = DataHandler.DataHandler(self.MPIHandler, tiaPipe, TIA.TIADriver._PAYLOAD_SIZE, filename=outFile);
 		self.handler.pause();
 		self.handler.start();
 		self.TIA.start();
@@ -49,7 +49,7 @@ class TemperatureSystem():
 
 		handlerBuffer = self.handler.getRealtimeQueue();
 		self.handler.enableRealtime();
-		self.processor = DataProcessor.DataProcessor(self.MPIProcessor, handlerBuffer, TIADriver._PAYLOAD_SIZE, rBias=TemperatureSystem.BIAS_RESISTORS, STCoeff=TemperatureSystem.ST_COEFF);
+		self.processor = DataProcessor.DataProcessor(self.MPIProcessor, handlerBuffer, TIA.TIADriver._PAYLOAD_SIZE, rBias=TemperatureSystem.BIAS_RESISTORS, STCoeff=TemperatureSystem.ST_COEFF);
 
 	def stop(self):
 		print("Halting Device");
@@ -73,9 +73,14 @@ class TemperatureSystem():
 		self.processor.start();
 		self.handler.resume();
 		processorBuffer = self.processor.getBuffer();
-		self.display = Display.GraphWindow(processorBuffer, self.fs, stopFcn=self.stop);
+		self.display = Display.GraphWindow(processorBuffer, self.fs*4.0/TIA.TIADriver._PAYLOAD_SIZE, stopFcn=self.stop);
 		self.display.run();
 		print("Device running");
+
+	def measureFs(self):
+		fs = self.TIA.getSampleRate();
+		print("Device is " + str(fs/1E3) + "Ksps");
+
 
 
 	def readAllMPI(self):

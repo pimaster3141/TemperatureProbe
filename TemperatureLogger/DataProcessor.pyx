@@ -1,9 +1,11 @@
 import setuptools
 import pyximport; pyximport.install()
 import threading
+import multiprocessing as mp
 import numpy as np
 import queue
 import Converters
+import time
 
 class DataProcessor(threading.Thread):
 	QUEUE_TIMEOUT = 1;
@@ -17,19 +19,19 @@ class DataProcessor(threading.Thread):
 		self.MPI = MPI;
 		self.inputBuffer = inputBuffer;
 
-		self.vBias = vBias;
+		self.vBias = 0.1;
 		self.QVConverter = Converters.QVConverter();
 		self.VRConverter = [None, None];
 		self.RTConverter = [None, None];
 		for i in range(2):
 			if(not rBias[i] == None):
 				self.VRConverter[i] = Converters.VRConverter(self.vBias, rBias[i]);
-				self.RTConverter[i] = Converters.RTConverter3(STCoeff[i][1], STCoeff[i][2], STCoeff[i][3]);
+				self.RTConverter[i] = Converters.RTConverter4(STCoeff[i][0], STCoeff[i][1], STCoeff[i][2], STCoeff[i][3]);
 
 		self.npDtype = np.uint16;
 		self.packetSize = int(bufferSize/2);
 
-		self.dataBuffer = threading.Queue(DataProcessor.QUEUE_DEPTH);
+		self.dataBuffer = mp.Queue(DataProcessor.QUEUE_DEPTH);
 
 		self.isDead = threading.Event();
 
@@ -46,8 +48,7 @@ class DataProcessor(threading.Thread):
 				data = np.zeros((inWaiting+1, self.packetSize), dtype=self.npDtype);
 				data[0] = initialData;
 
-				output = np.zeros((inWaiting+1), 4);
-
+				output = np.zeros(((inWaiting+1), 4));
 				try:
 					for i in range(inWaiting):
 						data[i+1][0:] = self.inputBuffer.get(block=True, timeout=DataProcessor.QUEUE_TIMEOUT);
@@ -62,9 +63,11 @@ class DataProcessor(threading.Thread):
 				output = self.QVConverter.convert(output);
 
 				if (not self.VRConverter[0] == None):
-					output[:,0] = self.RTConverter[0].convert(self.VRConverter[0].convert(output[:,0], vBias=output[:,4]));
+					output[:,0] = self.VRConverter[0].convert(output[:,0], vBias=output[:,3]);
+					output[:,0] = self.RTConverter[0].convert(output[:,0]);
 				if (not self.VRConverter[1] == None):
-					output[:,1] = self.RTConverter[1].convert(self.VRConverter[1].convert(output[:,1], vBias=output[:,4]));
+					output[:,1] = self.VRConverter[1].convert(output[:,1], vBias=output[:,3]);
+					# output[:,1] = self.RTConverter[1].convert(output[:,1]);
 
 				try:
 					self.dataBuffer.put_nowait(output);
@@ -105,6 +108,11 @@ class DataProcessor(threading.Thread):
 		finally:
 			self.MPI.close();
 			self.MPI.cancel_join_thread();
+
+	def stop(self):
+		if(not self.isDead.is_set()):
+			self.isDead.set();			
+			# self.join();
 
 	def getBuffer(self):
 		return self.dataBuffer;

@@ -2,6 +2,7 @@ import PyQt5
 import pyqtgraph as pg
 import numpy as np
 import time
+import queue
 
 class GraphWindow():
 	QUEUE_TIMEOUT = 5;
@@ -11,13 +12,19 @@ class GraphWindow():
 		self.depth = depth;
 		self.sampleRate = sampleRate;
 		self.refreshRate = refreshRate;
+		self._refreshPeriod = 1/self.refreshRate;
 
-		self.numSamples = self.depth * self.sampleRate;
+		self.numSamples = int(self.depth * self.sampleRate);
 		self.xData = np.arange(-self.numSamples, 0)/self.sampleRate;
 
 		self.stopFcn = stopFcn;
 
 		self.isAlive = True;
+		self._lastTime = time.time();
+
+		self.setupPlots();
+		self.setupDataBuffers();
+		self.setupCurves();
 
 	def setupPlots(self):
 		self.win = pg.GraphicsWindow("Temperature");
@@ -28,15 +35,15 @@ class GraphWindow():
 		self.refPlot.enableAutoRange(x=True, y=True);
 		self.refPlot.showGrid(x=True, y=True);
 
-		self.tempPlot = self.win.addPlot(title="Temperature Probe", labels={'left':('Temp', 'C'), 'bottom':('Time', 's')}, row=0, col=0);
+		self.tempPlot = self.win.addPlot(title="Temperature Probe", labels={'left':('Temp', 'C'), 'bottom':('Time', 's')}, row=1, col=0);
 		self.tempPlot.setMouseEnabled(x=False, y=False);
 		self.tempPlot.enableAutoRange(x=True, y=True);
 		self.tempPlot.showGrid(x=True, y=True);
 
-		self.vapPlot = self.win.addPlot(title="Vaporizer", labels={'bottom':('Time', 's')}, row=1, col=1);
+		self.vapPlot = self.win.addPlot(title="Vaporizer", labels={'bottom':('Time', 's')}, row=2, col=0);
 		self.vapPlot.setMouseEnabled(x=False, y=False);
 
-		self.voltPlot = self.win.addPlot(title="Voltage Reference", labels={'left':('Voltage', 'V'), 'bottom':('Time', 's')}, row=0, col=0);
+		self.voltPlot = self.win.addPlot(title="Voltage Reference", labels={'left':('Voltage', 'V'), 'bottom':('Time', 's')}, row=3, col=0);
 		self.voltPlot.setMouseEnabled(x=False, y=False);
 		self.voltPlot.enableAutoRange(x=True, y=True);
 
@@ -64,6 +71,11 @@ class GraphWindow():
 		self.tempBuffer = np.roll(self.tempBuffer, -1*numShift, axis=0);
 		self.vapBuffer = np.roll(self.vapBuffer, -1*numShift, axis=0);
 		self.voltBuffer = np.roll(self.voltBuffer, -1*numShift, axis=0);
+
+		self.refBuffer[-numShift:] = refData;
+		self.tempBuffer[-numShift:] = tempData;
+		self.vapBuffer[-numShift:] = vapData;
+		self.voltBuffer[-numShift:] = voltData;
 
 	def updateCurves(self):
 		self.refCurve.setData(x=self.xData, y=self.refBuffer);
