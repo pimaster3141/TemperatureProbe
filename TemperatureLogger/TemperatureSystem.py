@@ -12,9 +12,9 @@ import setuptools
 import pyximport; pyximport.install()
 
 import TIA
-import DataHandler
-import DataProcessor
-import Display
+import TempHandler
+import TempProcessor
+import TempDisplay
 import multiprocessing as mp
 import time
 
@@ -34,7 +34,7 @@ class TemperatureSystem():
 
 		self.TIA = TIA.TIADriver(self.MPITIA, device);
 		tiaPipe = self.TIA.getPipe();
-		self.handler = DataHandler.DataHandler(self.MPIHandler, tiaPipe, TIA.TIADriver._PAYLOAD_SIZE, filename=outFile);
+		self.handler = TempHandler.DataHandler(self.MPIHandler, tiaPipe, TIA.TIADriver._PAYLOAD_SIZE, filename=outFile);
 		self.handler.pause();
 		self.handler.start();
 		self.TIA.start();
@@ -49,7 +49,7 @@ class TemperatureSystem():
 
 		handlerBuffer = self.handler.getRealtimeQueue();
 		self.handler.enableRealtime();
-		self.processor = DataProcessor.DataProcessor(self.MPIProcessor, handlerBuffer, TIA.TIADriver._PAYLOAD_SIZE, rBias=TemperatureSystem.BIAS_RESISTORS, STCoeff=TemperatureSystem.ST_COEFF);
+		self.processor = TempProcessor.DataProcessor(self.MPIProcessor, handlerBuffer, TIA.TIADriver._PAYLOAD_SIZE, rBias=TemperatureSystem.BIAS_RESISTORS, STCoeff=TemperatureSystem.ST_COEFF);
 
 	def stop(self):
 		print("Halting Device");
@@ -73,7 +73,7 @@ class TemperatureSystem():
 		self.processor.start();
 		self.handler.resume();
 		processorBuffer = self.processor.getBuffer();
-		self.display = Display.GraphWindow(processorBuffer, self.fs*8.0/TIA.TIADriver._PAYLOAD_SIZE, stopFcn=self.stop);
+		self.display = TempDisplay.GraphWindow(processorBuffer, self.fs*8.0/TIA.TIADriver._PAYLOAD_SIZE, stopFcn=self.stop);
 		self.display.run();
 		print("Device running");
 
