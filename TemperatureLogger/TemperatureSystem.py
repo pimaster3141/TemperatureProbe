@@ -21,7 +21,7 @@ import time
 print("Done");
 
 class TemperatureSystem():
-	BIAS_RESISTORS = [10E3, None];
+	BIAS_RESISTORS = [10E3, 73200];
 	ST_COEFF=[[6.71742703E-04, 2.20416992E-04, 9.98713347E-08, -4.61649439E-11],
 		[None, None, None, None]]
 
