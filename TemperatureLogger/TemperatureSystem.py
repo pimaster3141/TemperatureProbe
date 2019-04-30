@@ -21,12 +21,17 @@ import time
 print("Done");
 
 class TemperatureSystem():
-	BIAS_RESISTORS = [10E3, 73200];
+	BIAS_RESISTORS = [10E3, 24E3];
 	ST_COEFF=[[6.71742703E-04, 2.20416992E-04, 9.98713347E-08, -4.61649439E-11],
 		[None, None, None, None]]
 
-	def __init__(self, device, outFile=None):
+	def __init__(self, device, outFile=None, directory='./output/'):
 		self.outFile = outFile;
+		self.directory = directory;
+		if (directory == None):
+			directory = './output/';
+		if(not(directory[-1] == '/')):
+			self.directory = directory + '/'
 
 		self.MPITIA = mp.Queue();
 		self.MPIHandler = mp.Queue();
@@ -34,7 +39,7 @@ class TemperatureSystem():
 
 		self.TIA = TIA.TIADriver(self.MPITIA, device);
 		tiaPipe = self.TIA.getPipe();
-		self.handler = TempHandler.DataHandler(self.MPIHandler, tiaPipe, TIA.TIADriver._PAYLOAD_SIZE, filename=outFile);
+		self.handler = TempHandler.DataHandler(self.MPIHandler, tiaPipe, TIA.TIADriver._PAYLOAD_SIZE, filename=outFile, directory=directory);
 		self.handler.pause();
 		self.handler.start();
 		self.TIA.start();
@@ -42,10 +47,6 @@ class TemperatureSystem():
 		print("Benchmarking ~10s");
 		time.sleep(10);
 		self.fs = self.TIA.getSampleRate();
-		print("Device is " + str(self.fs/1E3) + "Ksps");
-		if(not outFile == None):
-			with open(str(outFile)+".params", "w") as f:
-				f.write("fs="+str(self.fs)+"\n");
 
 		handlerBuffer = self.handler.getRealtimeQueue();
 		self.handler.enableRealtime();
@@ -70,6 +71,10 @@ class TemperatureSystem():
 
 	def start(self):
 		print("Starting Collection");
+		print("Device is " + str(self.fs/1E3) + "Ksps");
+		if(not self.outFile == None):
+			with open(str(self.directory + self.outFile)+".params", "w") as f:
+				f.write("fs="+str(self.fs)+"\n");
 		self.processor.start();
 		self.handler.resume();
 		processorBuffer = self.processor.getBuffer();
