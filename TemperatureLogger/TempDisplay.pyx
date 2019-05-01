@@ -35,17 +35,17 @@ class GraphWindow():
 		self.win = pg.GraphicsWindow("Temperature");
 		self.win.closeEvent = self.closeEvent;
 
-		self.refPlot = self.win.addPlot(title="Reference Probe", labels={'left':('Temp', 'C'), 'bottom':('Time', 's')}, row=0, col=0);
+		self.refPlot = self.win.addPlot(title="Reference Probe", labels={'left':('Temp', 'C'), 'bottom':('Time', 's')}, row=0, col=0, colspan=2);
 		self.refPlot.setMouseEnabled(x=False, y=False);
 		self.refPlot.enableAutoRange(x=True, y=True);
 		self.refPlot.showGrid(x=True, y=True);
 
-		self.tempPlot = self.win.addPlot(title="Temperature Probe", labels={'left':('Temp', 'C'), 'bottom':('Time', 's')}, row=1, col=0);
+		self.tempPlot = self.win.addPlot(title="Temperature Probe", labels={'left':('Temp', 'C'), 'bottom':('Time', 's')}, row=1, col=0, rowspan=2, colspan=2);
 		self.tempPlot.setMouseEnabled(x=False, y=False);
 		self.tempPlot.enableAutoRange(x=True, y=True);
 		self.tempPlot.showGrid(x=True, y=True);
 
-		self.vapPlot = self.win.addPlot(title="Vaporizer", labels={'bottom':('Time', 's')}, row=2, col=0);
+		self.vapPlot = self.win.addPlot(title="Vaporizer", labels={'bottom':('Time', 's')}, row=3, col=1);
 		self.vapPlot.setMouseEnabled(x=False, y=False);
 
 		self.voltPlot = self.win.addPlot(title="Voltage Reference", labels={'left':('Voltage', 'V'), 'bottom':('Time', 's')}, row=3, col=0);
