@@ -23,7 +23,8 @@ print("Done");
 class TemperatureSystem():
 	BIAS_RESISTORS = [10E3, 24E3];
 	ST_COEFF=[[6.71742703E-04, 2.20416992E-04, 9.98713347E-08, -4.61649439E-11],
-		[None, None, None, None]]
+		[  5.18278210e+02,  -5.07608221e+01,   9.76293395e-02,
+        -1.25900384e-04]]
 
 	def __init__(self, device, outFile=None, directory='./output/'):
 		self.outFile = outFile;
