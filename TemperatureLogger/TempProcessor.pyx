@@ -72,7 +72,7 @@ class DataProcessor(mp.Process):
 					output[:,0] = self.RTConverter[0].convert(output[:,0]);
 				if (not self.VRConverter[1] == None):
 					output[:,1] = self.VRConverter[1].convert(output[:,1], vBias=output[:,3]);
-					# output[:,1] = self.RTConverter[1].convert(output[:,1]);
+					output[:,1] = self.RTConverter[1].convert(output[:,1]);
 
 				try:
 					self.dataBuffer.put_nowait(output);
