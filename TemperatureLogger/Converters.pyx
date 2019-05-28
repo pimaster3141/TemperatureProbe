@@ -12,6 +12,7 @@ class VRConverterLive:
 	def __init__(self, rBias, alpha=0.005):
 		self.rBias = rBias;
 		self.alpha = alpha;
+		self.vBias = 0;
 
 	def convert(self, vIn, vBias):
 		# if(vBias == None):

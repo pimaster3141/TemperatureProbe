@@ -17,6 +17,7 @@ import TempProcessor
 import TempDisplay
 import multiprocessing as mp
 import time
+import numpy as np
 
 print("Done");
 
