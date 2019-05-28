@@ -8,11 +8,10 @@ class QVConverter:
 	def convert(self, LSB):
 		return LSB * self.fullscale / self.span;
 
-class VRConverter:
-	def __init__(self, vBias, rBias):
-		self.vBias = vBias;
+class VRConverterLive:
+	def __init__(self, rBias, alpha=0.005):
 		self.rBias = rBias;
-		self.alpha = 0.005;
+		self.alpha = alpha;
 
 	def convert(self, vIn, vBias):
 		# if(vBias == None):
@@ -21,26 +20,51 @@ class VRConverter:
 		self.vBias = vBias*self.alpha + self.vBias*(1-self.alpha);
 		return ((vIn - self.vBias) * self.rBias/self.vBias);
 
+class VRConverter:
+	def __init__(self, rBias):
+		self.rBias = rBias;
 
-class RTConverter3:
-	def __init__(self, A, B, C):
-		self.A = A;
-		self.B = B;
-		self.C = C;
-
-	def convert(self, rIn):
-		rIn = np.maximum(rIn, 1E-10);
-
-		output = self.A + self.B*np.log(rIn) + self.C*np.power(np.log(rIn), 3);
-		return 1/output - 273.15;
+	def convert(self, vIn, vBias):
+		return ((vIn - vBias) * self.rBias/vBias);
 
 
-class RTConverter4:
-	def __init__(self, A, B, C, D):
-		self.A = A;
-		self.B = B;
-		self.C = C;
-		self.D = D;
+
+# class RTConverter3:
+# 	def __init__(self, A, B, C):
+# 		self.A = A;
+# 		self.B = B;
+# 		self.C = C;
+
+# 	def convert(self, rIn):
+# 		rIn = np.maximum(rIn, 1E-10);
+
+# 		output = self.A + self.B*np.log(rIn) + self.C*np.power(np.log(rIn), 3);
+# 		return 1/output - 273.15;
+
+
+# class RTConverter4:
+# 	def __init__(self, A, B, C, D):
+# 		self.A = A;
+# 		self.B = B;
+# 		self.C = C;
+# 		self.D = D;
+
+# 	def convert(self, rIn):
+# 		rIn = np.maximum(rIn, 1E-10);
+
+# 		output = self.A + self.B*np.log(rIn) + self.C*np.power(np.log(rIn), 3) + self.D*np.power(np.log(rIn), 5);
+# 		return 1/output - 273.15;
+
+
+class RTConverter:
+	def __init__(self, coeff):
+		self.A = coeff[0];
+		self.B = coeff[1];
+		self.C = coeff[2];
+		if(len(coeff) == 3):
+			self.D = 0;
+		else:
+			self.D = coeff[3];
 
 	def convert(self, rIn):
 		rIn = np.maximum(rIn, 1E-10);

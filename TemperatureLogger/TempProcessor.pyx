@@ -21,14 +21,15 @@ class DataProcessor(mp.Process):
 		self.MPI = MPI;
 		self.inputBuffer = inputBuffer;
 
-		self.vBias = 0.1;
+		# self.vBias = 0.1;
 		self.QVConverter = Converters.QVConverter();
 		self.VRConverter = [None, None];
 		self.RTConverter = [None, None];
 		for i in range(2):
 			if(not rBias[i] == None):
-				self.VRConverter[i] = Converters.VRConverter(self.vBias, rBias[i]);
-				self.RTConverter[i] = Converters.RTConverter4(STCoeff[i][0], STCoeff[i][1], STCoeff[i][2], STCoeff[i][3]);
+				# self.VRConverter[i] = Converters.VRConverter(self.vBias, rBias[i]);
+				self.VRConverter[i] = Converters.VRConverterLive(rBias[i]);
+				self.RTConverter[i] = Converters.RTConverter(STCoeff[i]);
 
 		self.npDtype = np.uint16;
 		self.packetSize = int(bufferSize/2);

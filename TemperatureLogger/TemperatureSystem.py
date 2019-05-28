@@ -73,8 +73,9 @@ class TemperatureSystem():
 		print("Starting Collection");
 		print("Device is " + str(self.fs/1E3) + "Ksps");
 		if(not self.outFile == None):
-			with open(str(self.directory + self.outFile)+".params", "w") as f:
-				f.write("fs="+str(self.fs)+"\n");
+			# with open(str(self.directory + self.outFile)+".params", "w") as f:
+			# 	f.write("fs="+str(self.fs)+"\n");
+			np.savez(str(self.directory + self.outFile), BIAS_RESISTORS=TemperatureSystem.BIAS_RESISTORS, ST_COEFF=TemperatureSystem.ST_COEFF, fs=self.fs);
 		self.processor.start();
 		self.handler.resume();
 		processorBuffer = self.processor.getBuffer();
